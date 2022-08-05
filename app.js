@@ -9,6 +9,41 @@ let drawing = false;
 let changeMoonColor = false;
 const particles = [];
 let faulingStarArray = [];
+let resp = 1
+
+const dim = {
+  moonRadius: 60,
+  earhWidth: 70,
+  lineWidthWindow: 80,
+  lineWidthMiddle: 50,
+  window: {
+    moveX: 200,
+    moveY: 100,
+    lineX: 560,
+    lineY: 100
+  },
+  middleWindow: {
+    moveX: 375,
+    moveY: 150,
+    lineX: 375,
+    lineY: 50
+  },
+  house: {
+    moveX: 200,
+    moveY: 150,
+    width: 350,
+    height: 100
+  },
+  roof: {
+    moveX: 140,
+    moveY: 170,
+    lineX1: 375,
+    lineY1: 280,
+    lineX2: 610,
+    lineY2: 170,
+  }
+
+}
 
 window.addEventListener("mousemove", (e) => {
   particles.push(new Particle(e.offsetX, e.offsetY, 1, 0.20));
@@ -18,10 +53,10 @@ window.addEventListener("mousemove", (e) => {
     }
   }
   if (
-    e.offsetX > canvas.width - 250 &&
-    e.offsetX < canvas.width - 150 &&
-    e.offsetY < 350 &&
-    e.offsetY > 250
+    e.offsetX > (canvas.width - (canvas.width * 0.2)) - (dim.moonRadius / 1.5) &&
+    e.offsetX < (canvas.width - (canvas.width * 0.2)) + (dim.moonRadius / 1.5) &&
+    e.offsetY < (canvas.height * 0.2) + (dim.moonRadius / 1.5) &&
+    e.offsetY > (canvas.height * 0.2) - (dim.moonRadius / 1.5)
   ) {
     changeMoonColor = true;
   } else {
@@ -29,14 +64,23 @@ window.addEventListener("mousemove", (e) => {
   }
 });
 
-window.addEventListener("mouseover", (e) => {});
-
 window.addEventListener("mousedown", () => {
   drawing = true;
 });
 window.addEventListener("mouseup", () => {
   drawing = false;
 });
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.innerWidth < 992 
+                          ? (dim.moonRadius = 45,
+                            resp = 0.6) 
+                          : (dim.moonRadius = 60,
+                            resp = 1)
+
+})
 
 const faulingStar = {
   x: Math.random() * canvas.width,
@@ -136,28 +180,28 @@ function createStaticBackground() {
 function createEarth() {
   ctx.fillStyle = 'rgb(0, 32, 8)'
   ctx.beginPath()
-  ctx.fillRect(0, 880, canvas.width, canvas.height)
+  ctx.fillRect(0, canvas.height - dim.earhWidth, canvas.width, canvas.height)
   ctx.fill()
   ctx.closePath()
 }
 
 function createHouse() {
   ctx.strokeStyle = "rgb(100, 91, 3)";
-  ctx.lineWidth = 80;
+  ctx.lineWidth = dim.lineWidthWindow * resp;
   ctx.beginPath();
-  ctx.moveTo(200, 860);
-  ctx.lineTo(560, 860);
+  ctx.moveTo(canvas.width - (canvas.width - dim.window.moveX * resp), canvas.height - dim.window.moveY * resp);
+  ctx.lineTo(canvas.width - (canvas.width - dim.window.lineX * resp), canvas.height - dim.window.lineY * resp);
   ctx.stroke();
   ctx.closePath();
   ctx.strokeStyle = "#111";
-  ctx.lineWidth = 50;
+  ctx.lineWidth = dim.lineWidthMiddle * resp;
   ctx.beginPath();
-  ctx.moveTo(375, 796);
-  ctx.lineTo(375, 900);
+  ctx.moveTo(canvas.width - (canvas.width - dim.middleWindow.moveX * resp), canvas.height - dim.middleWindow.moveY * resp);
+  ctx.lineTo(canvas.width - (canvas.width - dim.middleWindow.lineX * resp), canvas.height - dim.middleWindow.lineY * resp);
   ctx.stroke();
   ctx.closePath();
   ctx.beginPath();
-  ctx.strokeRect(200, 796, 350, 100);
+  ctx.strokeRect(canvas.width - (canvas.width - dim.house.moveX * resp), canvas.height - dim.house.moveY * resp, dim.house.width * resp, dim.house.height * resp);
   ctx.stroke();
   ctx.closePath();
 
@@ -165,11 +209,10 @@ function createHouse() {
 
 function createRoof() {
   ctx.fillStyle = "#111";
-  ctx.lineWidth = 10;
   ctx.beginPath();
-  ctx.moveTo(140, 786);
-  ctx.lineTo(375, 680);
-  ctx.lineTo(610, 786);
+  ctx.moveTo(canvas.width - (canvas.width - dim.roof.moveX * resp), canvas.height - dim.roof.moveY * resp);
+  ctx.lineTo(canvas.width - (canvas.width - dim.roof.lineX1 * resp), canvas.height - dim.roof.lineY1 * resp);
+  ctx.lineTo(canvas.width - (canvas.width - dim.roof.lineX2 * resp), canvas.height - dim.roof.lineY2 * resp);
   ctx.fill();
   ctx.closePath();
 }
@@ -181,14 +224,12 @@ function createMoon() {
       (ctx.shadowBlur = 10))
     : (ctx.fillStyle = "#888");
   ctx.beginPath();
-  ctx.arc(canvas.width - 200, 300, 60, 0, Math.PI * 2);
+  ctx.arc(canvas.width - canvas.width * 0.2, canvas.height * 0.2, dim.moonRadius, 0, Math.PI * 2);
   ctx.fill();
   ctx.closePath();
 }
 
 function animate() {
-  // ctx.fillStyle = 'rgba(0, 0, 0, 0.06)'
-  // ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   handleParticles();
   createStaticBackground();
